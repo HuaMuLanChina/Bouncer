@@ -11,12 +11,12 @@ public class avoidwall : MonoBehaviour
         target = agent.GetComponent<agentstage3a>();
     }
 
-    private void OnTriggerEnter(Collider other)
+    private void OnCollisionEnter(Collision collision)
     {
-        if (other.gameObject.name == "Agent")
+        if (collision.gameObject.name == "Agent")
         {
             target.AddReward(-0.3f);
-            Debug.Log("Wall Hit");
+
         }
     }
 }

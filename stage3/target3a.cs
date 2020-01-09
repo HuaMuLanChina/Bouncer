@@ -11,6 +11,7 @@ public class target3a : MonoBehaviour
         target = agent.GetComponent<agentstage3a>();
     }
 
+    
     private void OnTriggerEnter(Collider other)
     {
         if (other.gameObject.name == "Agent")
