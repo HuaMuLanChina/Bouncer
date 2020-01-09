@@ -1,7 +1,7 @@
 ﻿using MLAgents;
 using UnityEngine;
 
-public class agentstage3 : Agent
+public class agentstage3a : Agent
 {
     public Transform Target;
     public blocks Wall;
@@ -70,14 +70,9 @@ public class agentstage3 : Agent
         }
     }
 
-    bool fisr_set = true;
     public override void AgentReset()
     {
-        if(fisr_set)
-        {
-            Wall.setwall();
-            fisr_set = false;
-        }
+        Wall.setwall();
 
         transform.localPosition = Wall.transform.right * Random.Range(-1, -6) + Wall.transform.forward * Random.Range(-1, -6) + Vector3.up * 0.5f;
         transform.localRotation = Quaternion.identity;
