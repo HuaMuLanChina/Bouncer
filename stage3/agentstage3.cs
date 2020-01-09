@@ -16,8 +16,14 @@ public class agentstage3 : Agent
     {
         AddVectorObs((transform.localPosition) / 5f);
         AddVectorObs((Target.localPosition) / 5f);
-        AddVectorObs(Wall.wallbricks[Wall.hole0].transform.parent.localPosition / 5f);
-        AddVectorObs(Wall.wallbricks[Wall.hole1].transform.parent.localPosition / 5f);
+        Vector3 hpos0 = Wall.wallbricks[Wall.hole0].position;
+        Vector3 hpos1 = Wall.wallbricks[Wall.hole1].position;
+        hpos0 = transform.parent.InverseTransformPoint(hpos0);
+        hpos1 = transform.parent.InverseTransformPoint(hpos1);
+        AddVectorObs(hpos0 / 5f);
+        AddVectorObs(hpos1 / 5f);
+        AddVectorObs(rb_bouncer.velocity.x);
+        AddVectorObs(rb_bouncer.velocity.z);
         //AddVectorObs(transform.localRotation);//考虑防止旋转变换不能穿过墙，测试大多数情况下都可以穿过墙
         AddVectorObs(IsOnGround() ? 1 : -1);
     }
@@ -50,7 +56,7 @@ public class agentstage3 : Agent
 
         Vector3 dir = new Vector3(vectorAction[0], 0, vectorAction[1]);
 
-        transform.localPosition += dir * speed * Time.deltaTime;
+        rb_bouncer.AddForce(dir * speed);
 
         if (IsOnGround() && vectorAction[2] > 0.0f)
         {

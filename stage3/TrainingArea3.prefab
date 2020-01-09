@@ -609,15 +609,16 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_BrainParameters:
-    vectorObservationSize: 13
+    vectorObservationSize: 15
     numStackedVectorObservations: 1
     vectorActionSize: 03000000
     vectorActionDescriptions: []
     vectorActionSpaceType: 1
-  m_Model: {fileID: 11400000, guid: 286e32fd90895ba48b335ae1d61922ca, type: 3}
+  m_Model: {fileID: 0}
   m_InferenceDevice: 0
   m_BehaviorType: 0
   m_BehaviorName: stage3
+  m_TeamID: 0
   m_useChildSensors: 1
 --- !u!1 &5781280599339430808
 GameObject:
