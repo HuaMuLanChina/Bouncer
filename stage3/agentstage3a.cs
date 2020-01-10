@@ -5,6 +5,9 @@ public class agentstage3a : Agent
 {
     public Transform Target;
     public blocks Wall;
+
+    public Transform Dummy0;
+    public Transform Dummy1; 
     private Rigidbody rb_bouncer;
 
     public override void InitializeAgent()
@@ -20,6 +23,8 @@ public class agentstage3a : Agent
         Vector3 hpos1 = Wall.wallbricks[Wall.hole1].position;
         hpos0 = transform.parent.InverseTransformPoint(hpos0);
         hpos1 = transform.parent.InverseTransformPoint(hpos1);
+        Dummy0.localPosition = hpos0;
+        Dummy1.localPosition = hpos1;
         AddVectorObs(hpos0 / 5f);
         AddVectorObs(hpos1 / 5f);
         AddVectorObs(rb_bouncer.velocity.x);
@@ -46,11 +51,11 @@ public class agentstage3a : Agent
     {
         if(Vector3.Dot(transform.localPosition - Wall.transform.localPosition, Wall.transform.forward) > 0)//学到了翻墙
         { 
-            SetReward(-0.0001f);
+            AddReward(-0.0001f);
         }
         else
         {
-            SetReward(-0.0005f);
+            AddReward(-0.0005f);
         }
 
         Vector3 dir = new Vector3(vectorAction[0], 0, vectorAction[1]);

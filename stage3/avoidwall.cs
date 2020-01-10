@@ -15,7 +15,7 @@ public class avoidwall : MonoBehaviour
     {
         if (collision.gameObject.name == "Agent")
         {
-            target.AddReward(-0.3f);
+            target.AddReward(-0.1f);
 
         }
     }
