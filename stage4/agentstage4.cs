@@ -16,8 +16,12 @@ public class agentstage4 : Agent
     {
         AddVectorObs((transform.localPosition) / 5f);
         AddVectorObs((Target.localPosition) / 5f);
-        AddVectorObs(Wall.wallbricks[Wall.hole0].transform.parent.localPosition / 5f);
-        AddVectorObs(Wall.wallbricks[Wall.hole1].transform.parent.localPosition / 5f);
+        Vector3 hpos0 = Wall.wallbricks[Wall.hole0].position;
+        Vector3 hpos1 = Wall.wallbricks[Wall.hole1].position;
+        hpos0 = transform.parent.InverseTransformPoint(hpos0);
+        hpos1 = transform.parent.InverseTransformPoint(hpos1);
+        AddVectorObs(hpos0 / 5f);
+        AddVectorObs(hpos1 / 5f);
         AddVectorObs(IsOnGround() ? 1 : -1);
     }
 

@@ -6,19 +6,27 @@ public class agentstage2 : Agent
     public Transform Target;
     public blocks Wall;
     private Rigidbody rb_bouncer;
+    stage2Academy m_Academy;
+    public float diffculty;
 
     public override void InitializeAgent()
     {
         rb_bouncer = GetComponent<Rigidbody>();
+        m_Academy = FindObjectOfType<stage2Academy>();
     }
-
+    Vector3 debugPoint;
     public override void CollectObservations()
     {
         AddVectorObs((transform.localPosition) / 5f);
         AddVectorObs((Target.localPosition) / 5f);
-        AddVectorObs(Wall.wallbricks[Wall.hole0].transform.localPosition / 5f);
-        AddVectorObs(Wall.wallbricks[Wall.hole1].transform.localPosition / 5f);
-        //AddVectorObs(transform.localRotation);//考虑防止旋转变换不能穿过墙，测试大多数情况下都可以穿过墙
+
+        AddVectorObs(rb_bouncer.velocity.x);
+        AddVectorObs(rb_bouncer.velocity.z);
+
+        Vector3 p0 = this.transform.parent.InverseTransformPoint(Wall.wallbricks[Wall.hole0].position);
+        Vector3 p1 = this.transform.parent.InverseTransformPoint(Wall.wallbricks[Wall.hole1].position);
+        AddVectorObs(p0 / 5f);
+        AddVectorObs(p1 / 5f);
         AddVectorObs(IsOnGround() ? 1 : -1);
     }
 
@@ -36,42 +44,101 @@ public class agentstage2 : Agent
         rb_bouncer.velocity += Vector3.up * JumpSpeed;
     }
 
-    public float speed = 3.0f;
-    public override void AgentAction(float[] vectorAction)
+    void dif_reward()
     {
-        SetReward(-0.0005f);
-        Vector3 dir = new Vector3(vectorAction[0], 0, vectorAction[1]);
-
-        transform.localPosition += dir * speed * Time.deltaTime;
-
-        if (IsOnGround() && vectorAction[2] > 0.0f)
+        AddReward(-0.0005f);
+        switch(diffculty)
         {
-            Jump();
-            SetReward(-0.3f);
+            //过墙
+            default:
+            case 1:{
+                    if (Vector3.Dot(transform.localPosition - Wall.transform.localPosition, Wall.transform.forward) > 0)
+                    {
+                        SetReward(1.0f);
+                        Done();
+                    }
+                } break;
+            //找到target
+            case 2:{
+                    if (Vector3.Dot(transform.localPosition - Wall.transform.localPosition, Wall.transform.forward) > 0)
+                    {
+                        AddReward(-0.0001f);
+                    }
+                } break;
+            //找到空中的target
+            case 3:{
+                } break;
+            //限制跳跃
+            case 4:{
+                    if(!IsOnGround())
+                    {
+                        AddReward(-0.1f);
+                    }
+                } break;
+        }
+
+        float distanceToTarget = Vector3.Distance(this.transform.localPosition, Target.localPosition);
+        if (distanceToTarget < 1.42f)
+        {
+            SetReward(1.0f);
+            Done();
         }
 
         if (transform.localPosition.y < 0f)
         {
             Done();
-            SetReward(-1.0f);
         }
     }
 
-    bool fisr_set = true;
+
+    public float speed = 3.0f;
+    public override void AgentAction(float[] vectorAction)
+    {
+        Vector3 dir = new Vector3(vectorAction[0], 0, vectorAction[1]);
+
+        rb_bouncer.AddForce(dir * speed);
+
+        if (IsOnGround() && vectorAction[2] > 0.0f)
+        {
+            Jump();
+        }
+
+        dif_reward();
+    }
+
+    void dif_reset(int dif)
+    {
+        switch (dif)
+        {
+            default:
+            case 1:
+                Target.localPosition = Wall.transform.right * Random.Range(1, 6) + Wall.transform.forward * Random.Range(1, 6) + Vector3.up * 2.0f;
+                break;
+            case 2:
+                Target.localPosition = Wall.transform.right * Random.Range(1, 6) + Wall.transform.forward * Random.Range(1, 6) + Vector3.up * 0.5f;
+                break;
+            case 3:
+                Target.localPosition = Wall.transform.right * Random.Range(1, 6) + Wall.transform.forward * Random.Range(1, 6) + Vector3.up * 2.0f;
+                break;
+            case 4:
+                Target.localPosition = Wall.transform.right * Random.Range(1, 6) + Wall.transform.forward * Random.Range(1, 6) + Vector3.up * 2.0f;
+                break;
+        }
+    }
+
     public override void AgentReset()
     {
-        if(fisr_set)
-        {
-            Wall.setwall();
-            fisr_set = false;
-        }
+        Wall.setwall();
 
         transform.localPosition = Wall.transform.right * Random.Range(-1, -6) + Wall.transform.forward * Random.Range(-1, -6) + Vector3.up * 0.5f;
         transform.localRotation = Quaternion.identity;
 
-        Target.localPosition = Wall.transform.right * Random.Range(1, 6) + Wall.transform.forward * Random.Range(1, 6) + Vector3.up * 1.83f;
+        //diffculty = m_Academy.FloatProperties.GetPropertyWithDefault("diffculty", 4);
+        diffculty = 1.0f;
+        dif_reset(Mathf.RoundToInt(diffculty));
 
         rb_bouncer.velocity = Vector3.zero;
+        rb_bouncer.angularVelocity = Vector3.zero;
     }
 
     public override float[] Heuristic()

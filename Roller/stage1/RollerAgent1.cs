@@ -1,17 +1,18 @@
-﻿using MLAgents;
+﻿using System;
+using MLAgents;
 using UnityEngine;
-using System.Linq;
+using System.Collections.Generic;
 
-public class agentstage5 : Agent
+public class RollerAgent1 : Agent
 {
-    public Transform Target;
-    private Rigidbody rb_bouncer;
-    private float speed = 3f;
+    Rigidbody rBody;
 
-    public override void InitializeAgent()
+    private void Start()
     {
-        rb_bouncer = GetComponent<Rigidbody>();
+        rBody = GetComponent<Rigidbody>();
     }
+
+    public Transform Target;
 
     const int k_NoAction = 0;  // do nothing!
     const int k_Up = 1;
@@ -19,22 +20,23 @@ public class agentstage5 : Agent
     const int k_Left = 3;
     const int k_Right = 4;
 
+    public override void AgentReset()
+    {
+        this.transform.localPosition = new Vector3(0f, 0.5f, 0f);
+        Target.localPosition = new Vector3(UnityEngine.Random.value * 8 -4, 0.5f, UnityEngine.Random.value * 8 -4);
+    }
+
     public override void CollectObservations()
     {
     }
 
-    public float JumpSpeed = 5.0f;
-    private void Jump()
-    {
-        rb_bouncer.velocity += Vector3.up * JumpSpeed;
-    }
 
+    public float speed = 10;
     public override void AgentAction(float[] vectorAction)
     {
-
         AddReward(-0.01f);
         var action = Mathf.FloorToInt(vectorAction[0]);
-        var curspeed = speed * Time.deltaTime;
+
         var targetPos = transform.position;
         switch (action)
         {
@@ -54,32 +56,23 @@ public class agentstage5 : Agent
                 targetPos = transform.position + new Vector3(0f, 0, -1f);
                 break;
             default:
-                throw new System.ArgumentException("Invalid action value");
+                throw new ArgumentException("Invalid action value");
         }
 
         transform.position = targetPos;
 
-        var hit = Physics.OverlapBox(
-            targetPos, new Vector3(0.3f, 0.3f, 0.3f), transform.rotation);
+        float distanceToTarget = Vector3.Distance(this.transform.localPosition, Target.localPosition);
 
-        if(hit.Where(col => col.gameObject.CompareTag("goal")).ToArray().Length == 1)
+        if(distanceToTarget < 1.42f)
         {
-            Done();
-            SetReward(1f);
-        }
-
-        if (Mathf.Abs(transform.localPosition.x) > 5f || Mathf.Abs(transform.localPosition.z) > 5f)
-        {
+            SetReward(1.0f);
             Done();
         }
-    }
 
-    public override void AgentReset()
-    {
-        transform.localPosition = new Vector3(Random.Range(-1, -5), 0.5f, Random.Range(-1, -5));
-        transform.localRotation = Quaternion.identity;
-
-        Target.localPosition = new Vector3(Random.Range(-1, -5), 0.5f, Random.Range(-1, -5));//bug
+        if(Mathf.Abs(this.transform.localPosition.x) > 5 || Mathf.Abs(this.transform.localPosition.z) > 5)
+        {
+            Done();
+        }
     }
 
     public override float[] Heuristic()
